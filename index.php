@@ -11,7 +11,7 @@ and open the template in the editor.
     </head>
     <body>
         <?php
-        $mydate ="06-04-2015";
+        $mydate ="04-05-2015";
         $mybh = isBankHoliday($mydate);
         echo $mydate ." BH " . $mybh;
         
@@ -25,10 +25,13 @@ and open the template in the editor.
         //  Now do actual checks     
         //-----------------------------------------------------------
             if (isNewYearsDay($fdate)===TRUE) {$isBH = TRUE;}
-            if (isChristmasDay($fdate)===TRUE) {$isBH = TRUE;}
-            if (isBoxingDay($fdate)===TRUE) {$isBH = TRUE;}
             if (isGoodFriday($fdate)===TRUE) {$isBH = TRUE;}
             if (isEasterMonday($fdate)===TRUE) {$isBH = TRUE;}
+            if (isEarlyMonday($fdate)===TRUE) {$isBH = TRUE;}
+            if (isLateMonday($fdate,"05")===TRUE) {$isBH = TRUE;}
+            if (isLateMonday($fdate,"08")===TRUE) {$isBH = TRUE;}
+            if (isChristmasDay($fdate)===TRUE) {$isBH = TRUE;}
+            if (isBoxingDay($fdate)===TRUE) {$isBH = TRUE;}
             return $isBH;
        }
        
@@ -107,7 +110,7 @@ and open the template in the editor.
             return $isBH;            
        }
        
-         function isEasterMonday($fdate){
+       function isEasterMonday($fdate){
         // takes in a string formatted dd-mm-yyyy
         // and returns true if that date is easter monday bank holiday
             $isBH = FALSE;
@@ -125,7 +128,46 @@ and open the template in the editor.
             endif;
             return $isBH;
        }
-        
+       
+       function isEarlyMonday($fdate){
+        // takes in a string formatted dd-mm-yyyy 
+        // and returns true if that date is early may bank holiday
+            $isBH = FALSE;
+            $bits = explode('-',$fdate);    // day - month - year
+            $fyear = $bits[2];                     
+            $StartSecs=mktime(0, 0, 0, $bits[1], $bits[0], $bits[2]);
+            $dayfalls = date("w",strtotime("01-05-$fyear"));
+            if ($dayfalls > 1):                
+                $dbhm = 9-$dayfalls;
+            elseif ($dayfalls == 0):
+                $dbhm = 2;
+            else:
+                $dbhm = 1;
+            endif;
+            $BHSecs=mktime(0, 0, 0, 05, $dbhm, $fyear);      // for bh monday
+            if ($StartSecs === $BHSecs) {$isBH = TRUE;}
+            return $isBH;
+       }
+       
+       function isLateMonday($fdate,$fmo){
+        // takes in a string formatted dd-mm-yyyy and month 05 or 08
+        // and returns true if that date is late monday bank holiday
+            $isBH = FALSE;
+            $bits = explode('-',$fdate);    // day - month - year
+            $fyear = $bits[2];                     
+            $StartSecs=mktime(0, 0, 0, $bits[1], $bits[0], $bits[2]);
+            $dayfalls = date("w",strtotime("31-$fmo-$fyear"));
+            if ($dayfalls == 1):                // is the date passed a friday
+                $dbhm = 31;
+            elseif ($dayfalls == 0):
+                $dbhm = 31 - 6;
+            else:
+                $dbhm = 31 - $dayfalls + 1;
+            endif;
+            $BHSecs=mktime(0, 0, 0, $fmo, $dbhm, $fyear);      // for bh monday
+            if ($StartSecs === $BHSecs) {$isBH = TRUE;}
+            return $isBH;
+       }
        ?>
     </body>
 </html>
