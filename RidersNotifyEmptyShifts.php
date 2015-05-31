@@ -26,7 +26,7 @@ and open the template in the editor.
   --------------------------------------------------------------------------------------
 */
         // get midnight today and midnight tomorrow as seconds  
-        $ReportType="Drivers";
+        $ReportType="Riders";
         $daystoreport = 8;
         $msgtxt ="";
         $yr=date("Y"); 
