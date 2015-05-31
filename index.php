@@ -11,17 +11,29 @@ and open the template in the editor.
     </head>
     <body>
         <?php
-        $mydate ="04-05-2015";
-        $mybh = isBankHoliday($mydate);
-        echo $mydate ." BH " . $mybh;
-        
-        
+        for ($myr =2014; $myr <2017; $myr++){
+            for ($mmo = 1; $mmo <=12; $mmo++){
+                for ($mda = 1; $mda  <= 31; $mda++) {
+                    $mydate ="$mda-$mmo-$myr";
+                $mybh = isBankHoliday($mydate);
+                if ($mybh == 1):
+                    echo $mydate ." is Bank Holiday " . "<br>";
+                endif;
+                }
+            } 
+        }
+ /*
+  * =====================================================================
+  * function definitions start here
+  * =====================================================================
+  */       
+     
         function isBankHoliday($fdate) {
         // takes in a string formatted dd-mm-yyyy
         // and returns true if thatdate is a bank holiday
             $isBH = FALSE;
             
-        //==========================================================
+        //----------------------------------------------------------
         //  Now do actual checks     
         //-----------------------------------------------------------
             if (isNewYearsDay($fdate)===TRUE) {$isBH = TRUE;}
@@ -81,7 +93,7 @@ and open the template in the editor.
             $fyear = $bits[2];
             $dayfalls = date("w",strtotime("25-12-$fyear"));
             if ($dayfalls ==0):
-                $tbh = "27-01-$fyear";
+                $tbh = "27-12-$fyear";
             elseif ($dayfalls == 6):
                 $tbh = "27-12-$fyear";
             else:
