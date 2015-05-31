@@ -57,7 +57,7 @@ and open the template in the editor.
         //  Boxing Day  - 26th Dec unless that falls on a weekend
             $dayfalls = date("w",strtotime("26-12-$fyear"));
             if ($dayfalls ==0):
-                $tbh = "28-01-$fyear";
+                $tbh = "28-12-$fyear";
             elseif ($dayfalls == 6):
                 $tbh = "28-12-$fyear";
             else:
