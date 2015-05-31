@@ -20,35 +20,17 @@ and open the template in the editor.
         // takes in a string formatted dd-mm-yyyy
         // and returns true if thatdate is a bank holiday
             $isBH = FALSE;
-            $bits = explode('-',$fdate);    // day - month - year
-            $fyear = $bits[2];
-        //  Now do actual checks
-        //  New Years Day  - 1st of Jan unless that falls on a weekend
-            $dayfalls = date("w",strtotime("01-01-$fyear"));
-            if ($dayfalls ==0):
-                $tbh = "02-01-$fyear";
-            elseif ($dayfalls == 6):
-                $tbh = "03-01-$fyear";
-            else:
-                $tbh = "01-01-$fyear";
-            endif; 
-            if (strtotime($fdate) == strtotime($tbh)) {$isBH = TRUE;}
             
-        //  Christmas Day  - 25th Dec unless that falls on a weekend
-            $dayfalls = date("w",strtotime("25-12-$fyear"));
-            if ($dayfalls ==0):
-                $tbh = "27-01-$fyear";
-            elseif ($dayfalls == 6):
-                $tbh = "27-12-$fyear";
-            else:
-                $tbh = "25-12-$fyear";
-            endif; 
-            if (strtotime($fdate) == strtotime($tbh)) {$isBH = TRUE;}
-            
+        //==========================================================
+        //  Now do actual checks     
+        //-----------------------------------------------------------
+            if (isNewYearsDay($fdate)===TRUE) {$isBH = TRUE;}
+            if (isChristmasDay($fdate)===TRUE) {$isBH = TRUE;}
             if (isBoxingDay($fdate)===TRUE) {$isBH = TRUE;}
             
             return $isBH;
        }
+       
        function isBoxingDay($fdate) {
         // takes in a string formatted dd-mm-yyyy
         // and returns true if that date is boxing day bank holiday
@@ -64,6 +46,42 @@ and open the template in the editor.
                 $tbh = "28-12-$fyear";
             else:
                 $tbh = "26-12-$fyear";
+            endif; 
+            if (strtotime($fdate) == strtotime($tbh)) {$isBH = TRUE;}
+            return $isBH;
+       }
+       
+       function isNewYearsDay($fdate) {
+        // takes in a string formatted dd-mm-yyyy
+        // and returns true if that date is new years day bank holiday
+            $isBH = FALSE;
+            $bits = explode('-',$fdate);    // day - month - year
+            $fyear = $bits[2];
+            $dayfalls = date("w",strtotime("01-01-$fyear"));
+            if ($dayfalls ==0):
+                $tbh = "02-01-$fyear";
+            elseif ($dayfalls == 6):
+                $tbh = "03-12-$fyear";
+            else:
+                $tbh = "01-01-$fyear";
+            endif; 
+            if (strtotime($fdate) == strtotime($tbh)) {$isBH = TRUE;}
+            return $isBH;
+       }
+       
+       function isChristmasDay($fdate) {
+        // takes in a string formatted dd-mm-yyyy
+        // and returns true if that date is xmas day bank holiday
+            $isBH = FALSE;
+            $bits = explode('-',$fdate);    // day - month - year
+            $fyear = $bits[2];
+            $dayfalls = date("w",strtotime("25-12-$fyear"));
+            if ($dayfalls ==0):
+                $tbh = "27-01-$fyear";
+            elseif ($dayfalls == 6):
+                $tbh = "27-12-$fyear";
+            else:
+                $tbh = "25-12-$fyear";
             endif; 
             if (strtotime($fdate) == strtotime($tbh)) {$isBH = TRUE;}
             return $isBH;
