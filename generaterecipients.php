@@ -18,6 +18,7 @@ This script generates a list of email recipients
          }
                  
         function GenerateEmailRecipients($fcat){
+            // fcat can be D or R or C
         
             require_once '../contxt/madonapps.inc';                // sets environment Variables
             require_once '../contxt/mrbs_dbconnect.inc';           // set dbconnect strings
