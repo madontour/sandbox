@@ -11,7 +11,7 @@ and open the template in the editor.
     </head>
     <body>
         <?php
-        $mydate ="26-12-2014";
+        $mydate ="06-04-2015";
         $mybh = isBankHoliday($mydate);
         echo $mydate ." BH " . $mybh;
         
@@ -27,7 +27,8 @@ and open the template in the editor.
             if (isNewYearsDay($fdate)===TRUE) {$isBH = TRUE;}
             if (isChristmasDay($fdate)===TRUE) {$isBH = TRUE;}
             if (isBoxingDay($fdate)===TRUE) {$isBH = TRUE;}
-            
+            if (isGoodFriday($fdate)===TRUE) {$isBH = TRUE;}
+            if (isEasterMonday($fdate)===TRUE) {$isBH = TRUE;}
             return $isBH;
        }
        
@@ -87,13 +88,44 @@ and open the template in the editor.
             return $isBH;
        }
        
+       function isGoodFriday($fdate){
+        // takes in a string formatted dd-mm-yyyy
+        // and returns true if that date is good friday bank holiday
+            $isBH = FALSE;
+            $dayfalls = date("w",strtotime($fdate));
+            if ($dayfalls == 5):                // is the date passed a friday
+                $bits = explode('-',$fdate);    // day - month - year
+                $fyear = $bits[2];                     
+                $StartSecs=mktime(0, 0, 0, $bits[1], $bits[0], $bits[2]);      // for date passed          
+
+                $yr=date("Y",easter_date($fyear)); 
+                $mo=date("n",easter_date($fyear));
+                $da=date("j",easter_date($fyear));
+                $BHSecs=mktime(0, 0, 0, $mo, $da-2, $yr);      // for good friday
+                if ($StartSecs === $BHSecs) {$isBH = TRUE;}
+            endif;
+            return $isBH;            
+       }
        
-                //$base = new DateTime("$year-03-21");
-            //$days = easter_days($year);  
-       
-       
-       
-       
-        ?>
+         function isEasterMonday($fdate){
+        // takes in a string formatted dd-mm-yyyy
+        // and returns true if that date is easter monday bank holiday
+            $isBH = FALSE;
+            $dayfalls = date("w",strtotime($fdate));
+            if ($dayfalls == 1):                // is the date passed a friday
+                $bits = explode('-',$fdate);    // day - month - year
+                $fyear = $bits[2];                     
+                $StartSecs=mktime(0, 0, 0, $bits[1], $bits[0], $bits[2]);      // for date passed          
+
+                $yr=date("Y",easter_date($fyear)); 
+                $mo=date("n",easter_date($fyear));
+                $da=date("j",easter_date($fyear));
+                $BHSecs=mktime(0, 0, 0, $mo, $da+1, $yr);      // for good friday
+                if ($StartSecs === $BHSecs) {$isBH = TRUE;}
+            endif;
+            return $isBH;
+       }
+        
+       ?>
     </body>
 </html>
