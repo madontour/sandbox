@@ -176,7 +176,7 @@ return $dsr;
         
             require_once '../contxt/madonapps.inc';                // sets environment Variables
             require_once '../contxt/mrbs_dbconnect.inc';           // set dbconnect strings
-    
+            global $DBServer, $DBUser, $DBPass, $DBName;
             unset($adreses);
 
             $conn = new mysqli($DBServer, $DBUser, $DBPass, $DBName);
