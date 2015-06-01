@@ -13,13 +13,13 @@ and open the template in the editor.
         <?php
         require_once '../contxt/madonapps.inc';                // sets environment Variables
         require_once '../common/phpmailer/class.phpmailer.php';
-        require_once '../common/phpmailer/class.smtp.php';
+        require_once '../common/phpmailer/class.smtp.php';     // set up mail extensions
         
         require_once '../common/mrbs/mrbs_periodnames.inc';    // sets period names
         require_once '../common/mrbs/mrbs_functions.inc';      // define useful functions
         require_once '../contxt/mrbs_dbconnect.inc';           // set dbconnect strings
 
-        #require_once './CommitteeAlertOnNoVolunteers.ini';     // default params & constants
+        require_once './RidersNotifyEmptyShifts.ini';          // default params & constants
 /*
   -------------------------------------------------------------------------------------        
          Real code starts here
@@ -27,7 +27,9 @@ and open the template in the editor.
 */
         // get midnight today and midnight tomorrow as seconds  
         $ReportType="Riders";
-        $daystoreport = 8;
+        $daystoreport = REPORTDAYS;
+        $ShiftCount=0;
+        unset($LineOfText);
         $msgtxt ="";
         $yr=date("Y"); 
         $mo=date("n");
@@ -41,6 +43,7 @@ and open the template in the editor.
                                 . date("l d/m/y",$StartSecs)
                                 . "<br><hr><br><br>";
         echo $msgtxt;
+        $LineOfText[]=$msgtxt;
         
         for($nod=0;$nod<=$daystoreport;$nod++){              
             $StartSecs=mktime(0, 0, 0, $mo, $da+$lag+$nod, $yr);       
@@ -78,26 +81,28 @@ and open the template in the editor.
                 unset($availableshifts["$shiftnum"]);
                 }
             if (count($availableshifts)>0):
+                $ShiftCount++ ;
                 echo "<strong>" .date("l jS-M-Y",$StartSecs) ."</strong><br>";
+                $LineOfText[]="<strong>" .date("l jS-M-Y",$StartSecs) ."</strong><br>";
                 foreach($availableshifts as  $FreeShiftName){
                     echo " - ". $FreeShiftName . "<br>";
+                    $LineOfText[]=" - ". $FreeShiftName . "<br>";
                 }
                 echo "<br>";
+                $LineOfText[]="<br>";
             endif;
            
 // next day in loop
         }
-        // echo $msgtxt. '<hr>';
         
-        /* 
-         * $msgtxt has the info
-         * Now Create and Send Email
-         */
+// Message complete - held in $LineOfText()
+// Now prepare and send email.
+      
  
-        if ($NumOfVolunteers == 0):
+    if ($ShiftCount > 0):
         $mail = new PHPMailer();  // defaults to using php "mail()"
         require_once '../contxt/mrbs_smtpconnect.inc';    // set defaults for googlemail 
-        // if recipients is set then add recipients
+        
         
         if (isset($recipients)) :
             foreach($recipients as $val) {
@@ -116,16 +121,28 @@ and open the template in the editor.
                 $mail->addBCC($val);            // Add a recipient BCC
             }
         endif;  
+        $blindsxs = GenerateEmailRecipients(substr($ReportType,0,1));
+        if (isset($blindsxs)) :
+            foreach($blindsxs as $val) {
+                $mail->addBCC($val);            // Add a recipient BCC
+            }
+        endif;  
  
-        $mail->Subject = MAILSUBJECT . date("l d/m/y",$StartSecs) ;           // Add subject
-        $mail->Body    = $msgtxt;
+        $mail->Subject = MAILSUBJECT ;           // Add subject
+        
+        $msgtxt="";
+        foreach ($LineOfText as $LOT){
+            $msgtxt .= $LOT;
+        }        
+        $mail->Body = $msgtxt;
 
-        if(!$mail->Send()) {
+        if(!$mail->Send()):
             echo "Mailer Error: " . $mail->ErrorInfo;
-        } else {
+        else:
             echo "Message sent!";
-        }
         endif;
+        
+    endif;  
 //===============================================================================
 function GetAvailableShifts($ftype,$fdate) {
     unset($fshifts);
@@ -154,6 +171,39 @@ if ((date("w",$fdate))==0) {$dsr=TRUE;}                     //Sunday
 if (isBankHoliday(date("m-n-Y",$fdate))==1) {$dsr=TRUE;}    //Bank Holiday
 return $dsr;
 }
+        function GenerateEmailRecipients($fcat){
+            // fcat can be D or R or C
+        
+            require_once '../contxt/madonapps.inc';                // sets environment Variables
+            require_once '../contxt/mrbs_dbconnect.inc';           // set dbconnect strings
+    
+            unset($adreses);
+
+            $conn = new mysqli($DBServer, $DBUser, $DBPass, $DBName);
+
+            // check connection
+            if ($conn->connect_error) {
+                trigger_error('Database connection failed: '  . $conn->connect_error, E_USER_ERROR);
+            }
+    
+            // Get record set
+            $sql="SELECT name, email, registers FROM mrbs_users "
+                    . "WHERE (registers LIKE '%$fcat%') ";
+            $rs=$conn->query($sql);
+
+            if($rs === false) {
+                trigger_error('Wrong SQL: ' . $sql . ' Error: ' . $conn->error, E_USER_ERROR);
+            } else {
+                $rows_returned = $rs->num_rows;
+            }
+            // iterate over record set
+            $rs->data_seek(0);
+            while($row = $rs->fetch_assoc()){
+                $adreses[]=$row['email'];
+            }
+            return $adreses;
+        }
+        
         ?>
     </body>
 </html>
