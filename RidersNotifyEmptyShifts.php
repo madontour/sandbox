@@ -124,7 +124,7 @@ and open the template in the editor.
         $blindsxs = GenerateEmailRecipients(substr($ReportType,0,1));
         if (isset($blindsxs)) :
             foreach($blindsxs as $val) {
-                $mail->addBCC($val);            // Add a recipient BCC
+                #$mail->addBCC($val);            // Add a recipient BCC
             }
         endif;  
  
@@ -143,66 +143,7 @@ and open the template in the editor.
         endif;
         
     endif;  
-//===============================================================================
-function GetAvailableShifts($ftype,$fdate) {
-    unset($fshifts);
-    if ($ftype==="R"):                              //Riders
-        if (DayShiftRequired($fdate)==1):
-            $fshifts = array("2"=>GetShiftName(2),"3"=>GetShiftName(3),
-                "4"=>GetShiftName(4),"5"=>GetShiftName(5),"6"=>GetShiftName(6));
-        else:
-            $fshifts = array("2"=>GetShiftName(2),"4"=>GetShiftName(4),
-                                "6"=>GetShiftName(6));
-        endif;
-    elseif ($ftype === "D"):                        //Drivers
-        if (DayShiftRequired($fdate)==1):
-            $fshifts = array("0"=>GetShiftName(0),"1"=>GetShiftName(1),
-                                "2"=>GetShiftName(2));
-        else:
-            $fshifts = array("1"=>GetShiftName(1),"2"=>GetShiftName(2));
-        endif;
-    endif;
-    return $fshifts;
-}
-function DayShiftRequired($fdate) {
-$dsr = FALSE;
-if ((date("w",$fdate))==6) {$dsr=TRUE;}                     //Saturday
-if ((date("w",$fdate))==0) {$dsr=TRUE;}                     //Sunday
-if (isBankHoliday(date("m-n-Y",$fdate))==1) {$dsr=TRUE;}    //Bank Holiday
-return $dsr;
-}
-        function GenerateEmailRecipients($fcat){
-            // fcat can be D or R or C
-        
-            require_once '../contxt/madonapps.inc';                // sets environment Variables
-            require_once '../contxt/mrbs_dbconnect.inc';           // set dbconnect strings
-            global $DBServer, $DBUser, $DBPass, $DBName;
-            unset($adreses);
 
-            $conn = new mysqli($DBServer, $DBUser, $DBPass, $DBName);
-
-            // check connection
-            if ($conn->connect_error) {
-                trigger_error('Database connection failed: '  . $conn->connect_error, E_USER_ERROR);
-            }
-    
-            // Get record set
-            $sql="SELECT name, email, registers FROM mrbs_users "
-                    . "WHERE (registers LIKE '%$fcat%') ";
-            $rs=$conn->query($sql);
-
-            if($rs === false) {
-                trigger_error('Wrong SQL: ' . $sql . ' Error: ' . $conn->error, E_USER_ERROR);
-            } else {
-                $rows_returned = $rs->num_rows;
-            }
-            // iterate over record set
-            $rs->data_seek(0);
-            while($row = $rs->fetch_assoc()){
-                $adreses[]=$row['email'];
-            }
-            return $adreses;
-        }
         
         ?>
     </body>
