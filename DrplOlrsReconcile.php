@@ -25,7 +25,7 @@ and open the template in the editor.
         #require_once './DrplOlrsReconcile.ini';          // default params & constants
 
         $RoleIds=GetRoleIds();
-        $MakeWhrStr($RoleIds);
+        $WhrStr = MakeWhrStr($RoleIds);
  /*
   * =====================================================================
   * function definitions start here
@@ -76,10 +76,10 @@ and open the template in the editor.
             if ($StLen == 0):
                 $myWhrStr = "WHERE (rid = '$rn')";
             else:
-                $myWhrStr = $myWhrStr . " " . " OR (rid = '$rn')";
+                $myWhrStr .= " " . " OR (rid = '$rn')";
             endif;
         }
-            
+        return $myWhrStr;    
         }   
         ?>
     </body>
