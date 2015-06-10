@@ -71,7 +71,7 @@ and open the template in the editor.
         
         function MakeWhrStr($frids){
         $myWhrStr = "";
-        foreach($frids as $rn){
+        foreach(array_Keys($frids) as $rn){
             $StLen = strlen($myWhrStr);
             if ($StLen == 0):
                 $myWhrStr = "WHERE (rid = '$rn')";
