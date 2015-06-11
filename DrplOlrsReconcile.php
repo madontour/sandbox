@@ -26,6 +26,7 @@ and open the template in the editor.
 
         $RoleIds=GetRoleIds();
         $WhrStr = MakeWhrStr($RoleIds);
+        $DrplMembers=GetDrplMembers($WhrStr);
  /*
   * =====================================================================
   * function definitions start here
@@ -81,6 +82,36 @@ and open the template in the editor.
         }
         return $myWhrStr;    
         }   
+        
+        function GetDrplMembers($fWhrStr){
+            Global $DBName, $DBServer, $DBUser, $DBPass;
+            $conn = new mysqli($DBServer, $DBUser, $DBPass, $DBName);
+
+            // check connection
+            if ($conn->connect_error):
+                trigger_error('Database connection failed: '  . $conn->connect_error, E_USER_ERROR);
+            endif;
+            
+            $sql="SELECT users.uid, name, rid FROM users " .
+                     "RIGHT JOIN users_roles ON users.uid=users_roles.uid " .
+                     $fWhrStr .
+                     " ORDER by uid";
+            #echo $sql."<br>";
+            $rs=$conn->query($sql);
+
+            if($rs === false) :
+                trigger_error('Wrong SQL: ' . $sql . ' Error: ' . $conn->error, E_USER_ERROR);
+            else:
+                $rows_returned = $rs->num_rows;
+            endif;
+            
+            // iterate over record set
+            $rs->data_seek(0);
+            while($row = $rs->fetch_assoc()){
+                echo $row['name'] . " " . $row['rid']."<br>";
+            }
+            return;
+        }
         ?>
     </body>
 </html>
