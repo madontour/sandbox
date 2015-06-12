@@ -95,7 +95,7 @@ and open the template in the editor.
             $sql="SELECT users.uid, name, rid FROM users " .
                      "RIGHT JOIN users_roles ON users.uid=users_roles.uid " .
                      $fWhrStr .
-                     " ORDER by uid";
+                     " ORDER by uid, rid";
             #echo $sql."<br>";
             $rs=$conn->query($sql);
 
@@ -106,9 +106,18 @@ and open the template in the editor.
             endif;
             
             // iterate over record set
+            unset($DrplMembers);
             $rs->data_seek(0);
             while($row = $rs->fetch_assoc()){
-                echo $row['name'] . " " . $row['rid']."<br>";
+                $myDrplName = strtolower($row['name']);
+                if(isset($DrplMembers[$row['uid']])):
+                    $myRoleStr = $DrplMembers[$row['uid']];
+                    $myRoleStr .= "," . $row['rid'];
+                else:
+                    $myRoleStr = $row['rid'];
+                endif;
+                $DrplMembers[$row['uid']]=$myRoleStr;
+                #echo $row['name'] . " " . $row['rid']. " - $myRoleStr <br>";
             }
             return;
         }
