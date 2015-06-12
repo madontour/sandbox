@@ -24,10 +24,11 @@ and open the template in the editor.
 
         #require_once './DrplOlrsReconcile.ini';          // default params & constants
 
-        $RoleIds=GetRoleIds();
-        $WhrStr = MakeWhrStr($RoleIds);
-        $DrplMembers=GetDrplMembers($WhrStr);
-        $OLRSMembers=GetOLRSMembers();
+        $RoleIds=GetRoleIds();                      //Get role numbers from drupal
+        $WhrStr = MakeWhrStr($RoleIds);             //Make a WHERE string
+        $DrplMembers=GetDrplMembers($WhrStr);       //Get Array of Drupal IDs with Role Ids
+        $OLRSMembers=GetOLRSMembers();              //Get Array of OLRS IDs with Role Ids
+        $Mismatches=GetMisMatches($DrplMembers,$OLRSMembers);
  /*
   * =====================================================================
   * function definitions start here
@@ -157,6 +158,7 @@ and open the template in the editor.
             }
             return $OLRSMembers;
         }
+        
         function Regs2Roles($myregs){
 /*
  * Send a string containing RDC#
@@ -200,6 +202,27 @@ and open the template in the editor.
                 $myroles=  substr($myroles,1);  
   
             return $myroles;    
+        }
+        
+        function GetMismatches($fd,$fo){
+            foreach (array_keys($fd) as $Duid){
+                $UserInOLRS = False;
+                foreach(array_keys($fo) as $Ouid){
+                    if ($Duid === $Ouid):
+                        $UserInOLRS = True;
+                        if ($fd[$Duid] !== $fo[$Ouid]) :
+                            $Mismatch[] = "User id $Duid has these " .
+                                "Drupal roles $fd[$Duid] but these " .
+                                "OLRS roles $fo[$Ouid]";
+                        endif;
+                    endif;
+                }
+                if ($UserInOLRS == False):
+                    $Mismatch[] =  "User id $Duid has these Drupal roles" .
+                                " $fd[$Duid] but is not found in OLRS";
+                endif;
+            }
+        return $Mismatch;
         }
         ?>
     </body>
