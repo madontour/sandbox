@@ -29,6 +29,7 @@ and open the template in the editor.
         $DrplMembers=GetDrplMembers($WhrStr);       //Get Array of Drupal IDs with Role Ids
         $OLRSMembers=GetOLRSMembers();              //Get Array of OLRS IDs with Role Ids
         $Mismatches=GetMisMatches($DrplMembers,$OLRSMembers);
+        $ExtraOLRS=GetExtraOLRS($DrplMembers,$OLRSMembers);
  /*
   * =====================================================================
   * function definitions start here
@@ -223,6 +224,22 @@ and open the template in the editor.
                 endif;
             }
         return $Mismatch;
+        }
+        
+        function GetExtraOLRS($fd,$fo){
+            foreach (array_keys($fo) as $Ouid){
+                $UserInDrpl = False;
+                foreach(array_keys($fd) as $Duid){
+                    if ($Duid === $Ouid):
+                        $UserInDrpl = True;
+                    endif;
+                }
+                if ($UserInDrpl == False):
+                    $ExtraO[] =  "User id $Ouid has these OLRS roles" .
+                                " $fo[$Ouid] but is not found in Drupal";
+                endif;
+            }
+        return $ExtraO;
         }
         ?>
     </body>
