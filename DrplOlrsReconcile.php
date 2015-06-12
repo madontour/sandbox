@@ -20,21 +20,22 @@ and open the template in the editor.
         
         #require_once '../common/mrbs/mrbs_periodnames.inc';    // sets period names
         #require_once '../common/mrbs/mrbs_functions.inc';      // define useful functions
-        #require_once '../contxt/mrbs_dbconnect.inc';           // set dbconnect strings
+        require_once '../contxt/mrbs_dbconnect.inc';           // set dbconnect strings
 
         #require_once './DrplOlrsReconcile.ini';          // default params & constants
 
         $RoleIds=GetRoleIds();
         $WhrStr = MakeWhrStr($RoleIds);
         $DrplMembers=GetDrplMembers($WhrStr);
+        $OLRSMembers=GetOLRSMembers();
  /*
   * =====================================================================
   * function definitions start here
   * =====================================================================
   */       
         function GetRoleIds() {
-            Global $DBName, $DBServer, $DBUser, $DBPass;
-            $conn = new mysqli($DBServer, $DBUser, $DBPass, $DBName);
+            Global $DBNameD, $DBServer, $DBUser, $DBPass;
+            $conn = new mysqli($DBServer, $DBUser, $DBPass, $DBNameD);
 
             // check connection
             if ($conn->connect_error) {
@@ -84,8 +85,8 @@ and open the template in the editor.
         }   
         
         function GetDrplMembers($fWhrStr){
-            Global $DBName, $DBServer, $DBUser, $DBPass;
-            $conn = new mysqli($DBServer, $DBUser, $DBPass, $DBName);
+            Global $DBNameD, $DBServer, $DBUser, $DBPass;
+            $conn = new mysqli($DBServer, $DBUser, $DBPass, $DBNameD);
 
             // check connection
             if ($conn->connect_error):
@@ -119,7 +120,86 @@ and open the template in the editor.
                 $DrplMembers[$row['uid']]=$myRoleStr;
                 #echo $row['name'] . " " . $row['rid']. " - $myRoleStr <br>";
             }
-            return;
+            return $DrplMembers;
+        }
+        
+        function GetOLRSMembers(){
+            Global $DBName, $DBServer, $DBUser, $DBPass;
+            $conn = new mysqli($DBServer, $DBUser, $DBPass, $DBName);
+
+            // check connection
+            if ($conn->connect_error):
+                trigger_error('Database connection failed: '  . $conn->connect_error, E_USER_ERROR);
+            endif;
+            
+            $sql="SELECT uid, registers FROM mrbs_users " .
+                     "WHERE name NOT Like '~*'  " .
+                     " ORDER by uid";
+            echo $sql."<br>";
+            $rs=$conn->query($sql);
+
+            if($rs === false) :
+                trigger_error('Wrong SQL: ' . $sql . ' Error: ' . $conn->error, E_USER_ERROR);
+            else:
+                $rows_returned = $rs->num_rows;
+            endif;
+            
+            // iterate over record set
+            unset($DrplMembers);
+            $rs->data_seek(0);
+            while($row = $rs->fetch_assoc()){
+                if (strlen(trim($row['registers']))>0):
+                    $myRoleStr=Regs2Roles(trim($row['registers']));
+                    $OLRSMembers[$row['uid']]=$myRoleStr;    
+                endif;
+                
+                #echo $row['name'] . " " . $row['rid']. " - $myRoleStr <br>";
+            }
+            return $OLRSMembers;
+        }
+        function Regs2Roles($myregs){
+/*
+ * Send a string containing RDC#
+ * Convert to s string containg role numbers 11,15,12,5
+ * Sort the role numbers and return the string
+ */
+            $mystrlen=strlen($myregs);
+            for($i = 0; $i <= $mystrlen-1; $i++){
+                if (substr($myregs, $i , 1 ) === "#"):
+                    if (isset($myroles)):
+                        $myroles .=(",5");
+                    else:
+                        $myroles = "5";
+                    endif;
+                elseif (substr($myregs, $i , 1 ) === "C"):
+                    if (isset($myroles)):
+                        $myroles .=(",12");
+                    else:
+                        $myroles = "12";
+                    endif;
+                elseif (substr($myregs, $i , 1 ) === "D"):
+                    if (isset($myroles)):
+                        $myroles .=(",15");
+                    else:
+                        $myroles = "15";
+                    endif;    
+                elseif (substr($myregs, $i , 1 ) === "R"):
+                    if (isset($myroles)):
+                        $myroles .=(",11");
+                    else:
+                        $myroles = "11";
+                    endif;
+                endif;
+            }
+                $bits =explode(",", $myroles);
+                asort($bits);
+                $myroles="";
+                foreach($bits as $r){
+                    $myroles.=",$r";
+                }
+                $myroles=  substr($myroles,1);  
+  
+            return $myroles;    
         }
         ?>
     </body>
